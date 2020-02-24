@@ -3,8 +3,8 @@
 #
 cmake_minimum_required (VERSION 3.8)
 
-find_package(FFTW3 CONFIG REQUIRED)
-find_package(OpenMP REQUIRED)
+find_package(FFTW3)
+find_package(OpenMP)
 
 # Add source to this project's executable.
 add_executable (PCFT 
