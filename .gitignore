@@ -1,0 +1,7 @@
+out/
+build/
+*.vs*
+*.DS_Store
+wisdom_output
+CMakeSettings.json
+
