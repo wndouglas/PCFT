@@ -27,7 +27,7 @@ void do_transform()
     using namespace numerics;
     using namespace tools;
 
-    const int N = 2;
+    const int N = 100'000;
     std::unique_ptr<IFourierTransformer> fftwTransformer = FTFactory::instance(FTFactory::TransformType::FFT);
     std::unique_ptr<IFourierTransformer> naiveTransformer = FTFactory::instance(FTFactory::TransformType::Naive);
 
