@@ -2,9 +2,7 @@
 //
 
 #include "tools/Timer.hpp"
-#include "numerics/IFourierTransformer.hpp"
-#include "numerics/FFTWTransformer.hpp"
-#include "numerics/NaiveTransformer.hpp"
+#include "numerics/FTFactory.hpp"
 #include <complex>
 #include <thread>
 
@@ -30,8 +28,8 @@ void do_transform()
     using namespace tools;
 
     const int N = 2;
-    std::unique_ptr<IFourierTransformer> fftwTransformer(new FFTWTransformer);
-    std::unique_ptr <IFourierTransformer> naiveTransformer(new NaiveTransformer);
+    std::unique_ptr<IFourierTransformer> fftwTransformer = FTFactory::instance(FTFactory::TransformType::FFT);
+    std::unique_ptr<IFourierTransformer> naiveTransformer = FTFactory::instance(FTFactory::TransformType::Naive);
 
     IFourierTransformer::ComplexVec fftwInVec(N), fftwOutVec(N), naiveInVec(N), naiveOutVec(N);
 

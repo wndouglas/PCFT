@@ -2,7 +2,9 @@
 # project specific logic here.
 #
 find_package(FFTW3)
-
+if(FFTW3_FOUND)
+    add_compile_definitions(USING_FFTW3)
+endif()
 
 # Add source to this project's executable.
 set(PCFT_LIB "PCFT")
