@@ -11,7 +11,7 @@ void FFTWTransformer::fft(const CVec& inputVector, CVec& outputVector) const
     const size_t N = inputVector.size();
     if (outputVector.size() != N)
     {
-        throw std::exception("Invalid input vectors");
+        throw std::runtime_error("Invalid input vectors");
     }
 
     fftw_complex *in, *out;
@@ -27,9 +27,9 @@ void FFTWTransformer::fft(const CVec& inputVector, CVec& outputVector) const
         rIn[1] = inputVector[i].imag();
     }
 
-    const char* filename = "wisdom_output";
+    const char* filename = "/wisdom_output";
     const int WISDOM_IMPORTED  = fftw_import_wisdom_from_filename(filename);
-    p = fftw_plan_dft_1d(N, in, out, FFTW_FORWARD, FFTW_MEASURE);
+    p = fftw_plan_dft_1d(N, in, out, FFTW_FORWARD, FFTW_ESTIMATE);
     const int WISDOM_OUTPUTTED = fftw_export_wisdom_to_filename(filename);
 
     fftw_execute(p); /* repeat as needed */;
@@ -52,7 +52,7 @@ void FFTWTransformer::ifft(const CVec& inputVector, CVec& outputVector) const
     const size_t N = inputVector.size();
     if (outputVector.size() != N)
     {
-        throw std::exception("Invalid input vectors");
+        throw std::runtime_error("Invalid input vectors");
     }
 
     fftw_complex *in, *out;
@@ -70,7 +70,7 @@ void FFTWTransformer::ifft(const CVec& inputVector, CVec& outputVector) const
 
     const char* filename = "wisdom_output";
     const int WISDOM_IMPORTED = fftw_import_wisdom_from_filename(filename);
-    p = fftw_plan_dft_1d(N, in, out, FFTW_BACKWARD, FFTW_MEASURE);
+    p = fftw_plan_dft_1d(N, in, out, FFTW_BACKWARD, FFTW_ESTIMATE);
     const int WISDOM_OUTPUTTED = fftw_export_wisdom_to_filename(filename);
 
     fftw_execute(p); /* repeat as needed */;

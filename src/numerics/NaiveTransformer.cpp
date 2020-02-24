@@ -26,7 +26,7 @@ void NaiveTransformer::fft(const CVec& inputVector, CVec& outputVector) const
     const size_t N = inputVector.size();
     if (outputVector.size() != N)
     {
-        throw std::exception("Invalid input vectors");
+        throw std::runtime_error("Invalid input vectors");
     }
 
     for (size_t k = 0; k < N; k++)
@@ -55,7 +55,7 @@ void NaiveTransformer::ifft(const CVec& inputVector, CVec& outputVector) const
     const size_t N = inputVector.size();
     if (outputVector.size() != N)
     {
-        throw std::exception("Invalid input vectors");
+        throw std::runtime_error("Invalid input vectors");
     }
 
     CVec conjugateInputVec = complexConjugate(inputVector);
@@ -66,7 +66,7 @@ void NaiveTransformer::ifft(const CVec& inputVector, CVec& outputVector) const
     {
         if ((std::fabs(conjugateInputVec[i].real() - inputVector[i].real()) >= small_val)
             || (std::fabs(conjugateInputVec[i].imag() + inputVector[i].imag()) >= small_val))
-            throw new std::exception("Failed complex conjugate");
+            throw new std::runtime_error("Failed complex conjugate");
     }
 
     fft(conjugateInputVec, outputVector);
