@@ -1,22 +1,22 @@
 ﻿# CMakeList.txt : CMake project for PCFT, include source and define
 # project specific logic here.
 #
-cmake_minimum_required (VERSION 3.8)
-
 find_package(FFTW3)
-find_package(OpenMP)
+
 
 # Add source to this project's executable.
-add_executable (PCFT 
-"PCFT.cpp"
-"PCFT.hpp"
-"numerics/FFTWTransformer.cpp"
-"numerics/FFTWTransformer.hpp"
-"numerics/NaiveTransformer.hpp"
-"numerics/NaiveTransformer.cpp"
-"numerics/IFourierTransformer.hpp"
-"tools/Timer.hpp")
+set(PCFT_LIB "PCFT")
+add_library (${PCFT_LIB})
+
+set(PCFT_EXE "PCFTexe")
+add_executable(${PCFT_EXE} PCFT.cpp)
 
 # TODO: Add tests and install targets if needed.
-target_link_libraries(PCFT PRIVATE FFTW3::fftw3)
-target_link_libraries(PCFT PRIVATE OpenMP::OpenMP_CXX)
+target_link_libraries(${PCFT_LIB} PRIVATE FFTW3::fftw3)
+target_include_directories(${PCFT_LIB} PUBLIC ${PROJECT_SOURCE_DIR}/include)
+
+target_link_libraries(${PCFT_EXE} PRIVATE ${PCFT_LIB})
+
+# Add subdirectories containing code
+add_subdirectory("numerics")
+add_subdirectory("tools")

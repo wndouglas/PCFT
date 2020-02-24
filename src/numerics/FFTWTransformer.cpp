@@ -1,4 +1,4 @@
-#include "FFTWTransformer.hpp"
+#include "numerics/FFTWTransformer.hpp"
 #include "fftw3.h"
 #include <exception>
 
@@ -11,7 +11,7 @@ void FFTWTransformer::fft(const CVec& inputVector, CVec& outputVector) const
     const size_t N = inputVector.size();
     if (outputVector.size() != N)
     {
-        throw std::exception("Invalid input vectors");
+        throw std::runtime_error("Invalid input vectors");
     }
 
     fftw_complex *in, *out;
@@ -52,7 +52,7 @@ void FFTWTransformer::ifft(const CVec& inputVector, CVec& outputVector) const
     const size_t N = inputVector.size();
     if (outputVector.size() != N)
     {
-        throw std::exception("Invalid input vectors");
+        throw std::runtime_error("Invalid input vectors");
     }
 
     fftw_complex *in, *out;

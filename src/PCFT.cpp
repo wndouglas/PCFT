@@ -1,29 +1,35 @@
 ﻿// PCFT.cpp : Defines the entry point for the application.
 //
 
-#include "PCFT.hpp"
 #include "tools/Timer.hpp"
 #include "numerics/IFourierTransformer.hpp"
 #include "numerics/FFTWTransformer.hpp"
 #include "numerics/NaiveTransformer.hpp"
 #include <complex>
+#include <thread>
+
+using namespace PCFT;
 
 void do_transform();
 
 int main()
 {
-    PCFT::tools::Timer<> t;
+    using namespace tools;
+    Timer t;
+    t.start();
     do_transform();
-    auto out = t.tick();
+    t.stop();
+    Timer::milliseconds dur = t.duration();
 
 	return 0;
 }
 
 void do_transform()
 {
-    using namespace PCFT::numerics;
+    using namespace numerics;
+    using namespace tools;
 
-    const int N = 10000;
+    const int N = 2;
     std::unique_ptr<IFourierTransformer> fftwTransformer(new FFTWTransformer);
     std::unique_ptr <IFourierTransformer> naiveTransformer(new NaiveTransformer);
 
@@ -51,15 +57,18 @@ void do_transform()
         count++;
     }
 
-    PCFT::tools::Timer<> t;
+    Timer t;
+    t.start();
     fftwTransformer->fft(fftwInVec, fftwOutVec);
     fftwTransformer->ifft(fftwOutVec, fftwInVec);
-    auto fftwOut = t.tick();
+    t.stop();
+    Timer::milliseconds dur1 = t.duration();
 
-    PCFT::tools::Timer<> tNew;
+    t.start();
     naiveTransformer->fft(naiveInVec, naiveOutVec);
     naiveTransformer->ifft(naiveOutVec, naiveInVec);
-    auto naiveOut = tNew.tick();
+    t.stop();
+    Timer::milliseconds dur2 = t.duration();
 
     std::vector<double> results(N);
     for (size_t i = 0; i < N; i++)
