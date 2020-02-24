@@ -1,7 +1,7 @@
 #ifndef NAIVE_TRANSFORMER_HPP
 #define NAIVE_TRANSFORMER_HPP
 
-#include "IFourierTransformer.hpp"
+#include "numerics/IFourierTransformer.hpp"
 
 namespace PCFT
 {

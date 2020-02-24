@@ -1,4 +1,4 @@
-#include "numerics/NaiveTransformer.hpp"
+#include "NaiveTransformer.hpp"
 
 using namespace PCFT::numerics;
 

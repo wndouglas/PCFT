@@ -1,11 +1,11 @@
 #include "numerics/FTFactory.hpp"
-#include "numerics/NaiveTransformer.hpp"
+#include "NaiveTransformer.hpp"
 
 using namespace PCFT::numerics;
 using namespace std;
 
 #ifdef USING_FFTW3
-#include "numerics/FFTWTransformer.hpp"
+#include "FFTWTransformer.hpp"
 
 unique_ptr<IFourierTransformer> FTFactory::instance()
 {

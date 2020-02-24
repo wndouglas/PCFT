@@ -1,7 +1,7 @@
 #ifndef FFTW_TRANSFORMER_HPP
 #define FFTW_TRANSFORMER_HPP
 
-#include "IFourierTransformer.hpp"
+#include "numerics/IFourierTransformer.hpp"
 
 namespace PCFT
 {

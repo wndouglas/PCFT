@@ -1,4 +1,4 @@
-#include "numerics/FFTWTransformer.hpp"
+#include "FFTWTransformer.hpp"
 #include "fftw3.h"
 #include <exception>
 
