@@ -51,7 +51,7 @@ TEST_CASE( "Test FFT Fourier transform", "[transform]" )
     pTransformer fftwTransformer, naiveTransformer;
     IFourierTransformer::ComplexVec fftwInVec, fftwOutVec;
     IFourierTransformer::ComplexVec naiveInVec, naiveOutVec;
-    size_t N = 1000;
+    size_t N = 10000;
     arrange_transforms(fftwTransformer, naiveTransformer, fftwInVec, fftwOutVec, 
         naiveInVec, naiveOutVec, N);
 
