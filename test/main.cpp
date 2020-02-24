@@ -1,9 +1,8 @@
+#define CATCH_CONFIG_MAIN
 #include "catch.hpp"
-#include "../src/numerics/fourierTransform/FFTWTransformer.hpp"
-#include "../src/numerics/fourierTransform/NaiveTransformer.hpp"
-#include "../src/numerics/fourierTransform/FourierTransformerFactory.hpp"
-#include "../src/tools/timer/TimerFactory.hpp"
-#include <memory>
+
+#include "numerics/FTFactory.hpp"
+#include "tools/Timer.hpp"
 
 using namespace PCFT::numerics;
 using namespace PCFT::tools;
@@ -15,11 +14,9 @@ IFourierTransformer::ComplexVec& fftwInVec,IFourierTransformer::ComplexVec& fftw
 IFourierTransformer::ComplexVec& naiveInVec, IFourierTransformer::ComplexVec& naiveOutVec,
 size_t N)
 {
-    //std::unique_ptr<ITimer> pTimer = TimerFactory::instance();
-
     typedef std::complex<double> CDouble;
-    fftwTransformer.reset(new FFTWTransformer());
-    naiveTransformer.reset(new NaiveTransformer());
+    fftwTransformer = FTFactory::instance(FTFactory::TransformType::FFT);
+    naiveTransformer = FTFactory::instance(FTFactory::TransformType::FFT);
 
     fftwInVec.resize(N);
     fftwOutVec.resize(N);
@@ -28,8 +25,8 @@ size_t N)
     int count = 0;
     for (CDouble &element : fftwInVec)
     {
-         const double PI = 2*std::asin(1.0);
-         const double x = count * PI / (N - 1.0);
+        const double PI = 2*std::asin(1.0);
+        const double x = count * PI / (N - 1.0);
 
         element = {0.0,  1/(x+1) };
          
@@ -54,7 +51,7 @@ TEST_CASE( "Test FFT Fourier transform", "[transform]" )
     pTransformer fftwTransformer, naiveTransformer;
     IFourierTransformer::ComplexVec fftwInVec, fftwOutVec;
     IFourierTransformer::ComplexVec naiveInVec, naiveOutVec;
-    size_t N = 100;
+    size_t N = 1000;
     arrange_transforms(fftwTransformer, naiveTransformer, fftwInVec, fftwOutVec, 
         naiveInVec, naiveOutVec, N);
 

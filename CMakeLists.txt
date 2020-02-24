@@ -8,4 +8,5 @@ set(CMAKE_CXX_STANDARD 14)
 
 # Include sub-projects.
 add_subdirectory ("src")
+add_subdirectory("examples")
 add_subdirectory("test")
