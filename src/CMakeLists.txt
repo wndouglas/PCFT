@@ -10,10 +10,11 @@ endif()
 set(PCFT_LIB "PCFT")
 set(PCFT_LIB ${PCFT_LIB} PARENT_SCOPE)
 add_library (${PCFT_LIB})
+install(TARGETS ${PCFT_LIB} DESTINATION ${PCFT_INSTALL_BIN_DIR})
 
 # TODO: Add tests and install targets if needed.
 target_link_libraries(${PCFT_LIB} PRIVATE FFTW3::fftw3)
-target_include_directories(${PCFT_LIB} PUBLIC ${PROJECT_SOURCE_DIR}/include)
+target_include_directories(${PCFT_LIB} PUBLIC ${PCFT_INCLUDE_DIR})
 
 # Add subdirectories containing code
 add_subdirectory("numerics")

@@ -8,6 +8,6 @@ if(catch2_FOUND)
 
     target_link_libraries(${PCFT_TEST} ${PCFT_LIB})
     target_link_libraries(${PCFT_TEST} Catch2::Catch2)
-    target_include_directories(${PCFT_TEST} PUBLIC ${PROJECT_SOURCE_DIR}/include)
-
+    target_include_directories(${PCFT_TEST} PUBLIC ${PCFT_INCLUDE_DIR})
+    
 endif()
