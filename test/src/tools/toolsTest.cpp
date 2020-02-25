@@ -5,7 +5,7 @@
 using namespace PCFT::tools;
 using namespace std;
 
-TEST_CASE( "Test Timer accuracy", "[timer]" )
+TEST_CASE( "Timer should be accurate up to a certain tolerance", "[timer]" )
 {
     // Arrange
     Timer timer;

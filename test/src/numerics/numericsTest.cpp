@@ -41,7 +41,7 @@ size_t N)
     }
 }
 
-TEST_CASE( "Test FFT Fourier transform", "[transform]" )
+TEST_CASE( "Fourier transform followed by its reverse should be identity operation", "[transform]" )
 {
     // Arrange
     pTransformer fftwTransformer, naiveTransformer;
