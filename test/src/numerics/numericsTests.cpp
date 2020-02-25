@@ -1,8 +1,6 @@
-#ifndef NUMERICS_TESTS_HPP
-#define NUMERICS_TESTS_HPP
-
 #include "numerics/FTFactory.hpp"
 #include "tools/Timer.hpp"
+#include "catch.hpp"
 
 using namespace PCFT::numerics;
 using namespace PCFT::tools;
@@ -77,5 +75,3 @@ TEST_CASE( "Test FFT Fourier transform", "[transform]" )
     }
     REQUIRE(toleranceMet);
 }
-
-#endif
