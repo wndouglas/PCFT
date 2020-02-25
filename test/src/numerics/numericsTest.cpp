@@ -1,9 +1,7 @@
 #include "numerics/FTFactory.hpp"
-#include "tools/Timer.hpp"
 #include "catch.hpp"
 
 using namespace PCFT::numerics;
-using namespace PCFT::tools;
 typedef std::unique_ptr<IFourierTransformer> pTransformer; 
 
 void arrange_transforms(pTransformer& fftwTransformer,
