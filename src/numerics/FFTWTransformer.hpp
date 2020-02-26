@@ -10,8 +10,17 @@ namespace PCFT
 		class FFTWTransformer : public IFourierTransformer
 		{
 		public:
-			void fft(const ComplexVec& inputVector, ComplexVec& outputVector) const override;
-			void ifft(const ComplexVec& inputVector, ComplexVec& outputVector) const override;
+			FFTWTransformer(const int N);
+			~FFTWTransformer();
+
+			void fft(const RealVec& inputVector, ComplexVec& outputVector) const override;
+			void ifft(const ComplexVec& inputVector, RealVec& outputVector) const override;
+
+			int getNumPoints() const;
+
+		private:
+			class FFTWTransformerImpl;
+			std::unique_ptr<FFTWTransformerImpl> mImpl;
 		};
 	}
 }

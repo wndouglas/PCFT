@@ -13,8 +13,8 @@ namespace PCFT
                     Naive
                 };
 
-            static std::unique_ptr<IFourierTransformer> instance();
-            static std::unique_ptr<IFourierTransformer> instance(TransformType transformType);
+            static std::unique_ptr<IFourierTransformer> instance(const int N);
+            static std::unique_ptr<IFourierTransformer> instance(TransformType transformType, const int N);
         };
     }
 }

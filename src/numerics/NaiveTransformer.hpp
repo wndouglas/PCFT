@@ -10,8 +10,12 @@ namespace PCFT
 		class NaiveTransformer : public IFourierTransformer
 		{
 		public:
-			void fft(const ComplexVec& inputVector, ComplexVec& outputVector) const override;
-			void ifft(const ComplexVec& inputVector, ComplexVec& outputVector) const override;
+			NaiveTransformer(const int N) : mNumElements(N) { }
+
+			void fft(const RealVec& inputVector, ComplexVec& outputVector) const override;
+			void ifft(const ComplexVec& inputVector, RealVec& outputVector) const override;
+		private:
+			const int mNumElements;
 		};
 	}
 }

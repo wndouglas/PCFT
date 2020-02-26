@@ -3,11 +3,11 @@
 using namespace PCFT::numerics;
 
 typedef IFourierTransformer::ComplexVec CVec;
+typedef IFourierTransformer::RealVec RVec;
 
 namespace
 {
     const double PI = atan(1.0) * 4.0;
-
     CVec complexConjugate(const CVec& cVec)
     {
         const size_t N = cVec.size();
@@ -19,41 +19,54 @@ namespace
         }
         return newVec;
     }
+
+    void complex_fft(const CVec& inputVector, CVec& outputVector)
+    {
+        const size_t N = inputVector.size();
+
+        for (size_t k = 0; k < N; k++)
+        {
+            std::complex<double>& outputElement = outputVector[k];
+            outputElement = { 0.0, 0.0 };
+            for (size_t j = 0; j < N; j++)
+            {
+                const std::complex<double>& inputElement = inputVector[j];
+                double x1 = inputElement.real();
+                double y1 = inputElement.imag();
+
+                double x2 = std::cos(-2 * PI * j * k / N);
+                double y2 = std::sin(-2 * PI * j * k / N);
+
+                outputElement.real(outputElement.real() + x1 * x2 - y1 * y2);
+                outputElement.imag(outputElement.imag() + x1 * y2 + x2 * y1);
+            }
+            outputElement.real(outputElement.real()/std::sqrt(N));
+            outputElement.imag(outputElement.imag() / std::sqrt(N));
+        }
+    }
 }
 
-void NaiveTransformer::fft(const CVec& inputVector, CVec& outputVector) const
+void NaiveTransformer::fft(const RVec& inputVector, CVec& outputVector) const
 {
     const size_t N = inputVector.size();
-    if (outputVector.size() != N)
+    if (outputVector.size() != N || N != mNumElements)
     {
         throw std::runtime_error("Invalid input vectors");
     }
 
-    for (size_t k = 0; k < N; k++)
+    CVec inputVecComplex(N);
+    for(size_t k = 0; k < N; k++)
     {
-        std::complex<double>& outputElement = outputVector[k];
-        outputElement = { 0.0, 0.0 };
-        for (size_t j = 0; j < N; j++)
-        {
-            const std::complex<double>& inputElement = inputVector[j];
-            double x1 = inputElement.real();
-            double y1 = inputElement.imag();
-
-            double x2 = std::cos(-2 * PI * j * k / N);
-            double y2 = std::sin(-2 * PI * j * k / N);
-
-            outputElement.real(outputElement.real() + x1 * x2 - y1 * y2);
-            outputElement.imag(outputElement.imag() + x1 * y2 + x2 * y1);
-        }
-        outputElement.real(outputElement.real()/std::sqrt(N));
-        outputElement.imag(outputElement.imag() / std::sqrt(N));
+        inputVecComplex[k].real(inputVector[k]);
     }
+
+    complex_fft(inputVecComplex, outputVector);
 }
 
-void NaiveTransformer::ifft(const CVec& inputVector, CVec& outputVector) const
+void NaiveTransformer::ifft(const CVec& inputVector, RVec& outputVector) const
 {
     const size_t N = inputVector.size();
-    if (outputVector.size() != N)
+    if (outputVector.size() != N || N != mNumElements)
     {
         throw std::runtime_error("Invalid input vectors");
     }
@@ -62,13 +75,13 @@ void NaiveTransformer::ifft(const CVec& inputVector, CVec& outputVector) const
 
     double small_val = 1e-9;
     bool close = true;
-    for (size_t i = 0; i < N; i++)
-    {
-        if ((std::fabs(conjugateInputVec[i].real() - inputVector[i].real()) >= small_val)
-            || (std::fabs(conjugateInputVec[i].imag() + inputVector[i].imag()) >= small_val))
-            throw new std::runtime_error("Failed complex conjugate");
-    }
 
-    fft(conjugateInputVec, outputVector);
-    outputVector = complexConjugate(outputVector);
+    CVec tempOutputVector(N);
+    complex_fft(conjugateInputVec, tempOutputVector);
+    tempOutputVector = complexConjugate(tempOutputVector);
+
+    for(size_t i = 0; i < N; i++)
+    {
+        outputVector[i] = tempOutputVector[i].real();
+    } 
 }

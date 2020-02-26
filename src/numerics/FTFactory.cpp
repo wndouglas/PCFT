@@ -7,32 +7,32 @@ using namespace std;
 #ifdef USING_FFTW3
 #include "FFTWTransformer.hpp"
 
-unique_ptr<IFourierTransformer> FTFactory::instance()
+unique_ptr<IFourierTransformer> FTFactory::instance(const int N)
 {
-    return instance(TransformType::FFT);
+    return instance(TransformType::FFT, N);
 }
 
-unique_ptr<IFourierTransformer> FTFactory::instance(FTFactory::TransformType transformType)
+unique_ptr<IFourierTransformer> FTFactory::instance(FTFactory::TransformType transformType, const int N)
 {
     unique_ptr<IFourierTransformer> transformer;
     switch(transformType)
     {
         case TransformType::FFT:
-            transformer = make_unique<FFTWTransformer>();
+            transformer = make_unique<FFTWTransformer>(N);
             break;
         default:
-            transformer = make_unique<NaiveTransformer>();
+            transformer = make_unique<NaiveTransformer>(N);
             break;
     }
     return transformer;
 }
 #else
-unique_ptr<IFourierTransformer> FTFactory::instance()
+unique_ptr<IFourierTransformer> FTFactory::instance(const int N)
 {
-    return instance(TransformType::Naive);
+    return instance(TransformType::Naive, N);
 }
 
-unique_ptr<IFourierTransformer> FTFactory::instance(FTFactory::TransformType transformType)
+unique_ptr<IFourierTransformer> FTFactory::instance(FTFactory::TransformType transformType, const int N)
 {
     unique_ptr<IFourierTransformer> transformer;
     switch(transformType)
@@ -41,7 +41,7 @@ unique_ptr<IFourierTransformer> FTFactory::instance(FTFactory::TransformType tra
             throw runtime_error("FFT type transform has no implementation present.");
             break;
         default:
-            transformer = make_unique<NaiveTransformer>();
+            transformer = make_unique<NaiveTransformer>(N);
             break;
     }
     return transformer;
