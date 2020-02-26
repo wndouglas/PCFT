@@ -23,9 +23,9 @@ public:
         #endif
         
         mIn = fftw_alloc_real(N);
-        mOut = fftw_alloc_complex(N);
+        mOut = fftw_alloc_complex(N/2 + 1);
 
-        const char* filename = "/wisdom_output_r";
+        const char* filename = "wisdom_output_r";
         const int WISDOM_IMPORTED  = fftw_import_wisdom_from_filename(filename);     
         mPlanFw = fftw_plan_dft_r2c_1d(N, mIn, mOut, FFTW_MEASURE);
         mPlanBw = fftw_plan_dft_c2r_1d(N, mOut, mIn, FFTW_MEASURE);
@@ -51,16 +51,22 @@ public:
         fftw_execute(mPlanFw);
             
         double sqrtN = sqrt(mNumElements);
-        for(int i = 0; i < mNumElements; ++i)
+        for(int i = 0; i < mNumElements/2 + 1; ++i)
         {
             outputVec[i].real(mOut[i][0]/sqrtN);
             outputVec[i].imag(mOut[i][1]/sqrtN);
+        }
+        for(int i = mNumElements/2 + 1; i < mNumElements; i++)
+        {
+            int j = mNumElements - i;
+            outputVec[i].real(outputVec[j].real());
+            outputVec[i].imag(-outputVec[j].imag());
         }
     }
 
     void ifft(const CVec& inputVec, RVec& outputVec)
     {
-        for(int i = 0; i < mNumElements; ++i)
+        for(int i = 0; i < mNumElements/2 + 1; ++i)
         {
             mOut[i][0] = inputVec[i].real();
             mOut[i][1] = inputVec[i].imag();

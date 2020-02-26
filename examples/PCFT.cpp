@@ -72,14 +72,21 @@ void do_transform()
 
     
     std::vector<double> resultsReal(N);
+    std::vector<double> resultsComplex(N);
+    double resultsComplexL2Error = 0.0;
     double resultsRealL2Error = 0.0;
     for (size_t i = 0; i < N; i++)
     {
         resultsReal[i] = pow(fftwRealInVec[i] - naiveRealInVec[i], 2);
         resultsRealL2Error += resultsReal[i];
+
+        resultsComplex[i] = pow(fftwOutVec[i].real() - naiveOutVec[i].real(), 2) + pow(fftwOutVec[i].imag() - naiveOutVec[i].imag(), 2);
+        resultsComplexL2Error += resultsComplex[i];
     }
     resultsRealL2Error = sqrt(resultsRealL2Error/N);
+    resultsComplexL2Error = sqrt(resultsComplexL2Error/N);
 
+    std::cout << "Complex l2 error is: " << resultsComplexL2Error << std::endl;
     std::cout << "Real l2 error is: " << resultsRealL2Error << std::endl;
 }
 
