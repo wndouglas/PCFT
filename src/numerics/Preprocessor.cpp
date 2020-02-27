@@ -14,6 +14,7 @@ Preprocessor::Preprocessor(std::unique_ptr<IFourierTransformer> transformer,
 					mEpsilon1(pPackage.epsilon1),
 					mEpsilon2(pPackage.epsilon2) { }
 
+// The input vector here is the Green's function transform G, which we know in closed form.
 void Preprocessor::execute(const RVec& inputVector, RVec& outputVector) const
 {
 	// Test implementation
