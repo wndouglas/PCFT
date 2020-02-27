@@ -5,6 +5,7 @@
 #include "numerics/FTFactory.hpp"
 #include <complex>
 #include <thread>
+#include <iostream>
 
 using namespace PCFT;
 
@@ -27,53 +28,65 @@ void do_transform()
     using namespace numerics;
     using namespace tools;
 
-    const int N = 100'000;
-    std::unique_ptr<IFourierTransformer> fftwTransformer = FTFactory::instance(FTFactory::TransformType::FFT);
-    std::unique_ptr<IFourierTransformer> naiveTransformer = FTFactory::instance(FTFactory::TransformType::Naive);
+    const int N = 10000;
+    std::unique_ptr<IFourierTransformer> fftwTransformer = FTFactory::instance(FTFactory::TransformType::FFT, N);
+    std::unique_ptr<IFourierTransformer> naiveTransformer = FTFactory::instance(FTFactory::TransformType::Naive, N);
 
-    IFourierTransformer::ComplexVec fftwInVec(N), fftwOutVec(N), naiveInVec(N), naiveOutVec(N);
+    IFourierTransformer::ComplexVec fftwOutVec(N), naiveOutVec(N);
+    IFourierTransformer::RealVec fftwRealInVec(N), naiveRealInVec(N);
 
+    const double PI = 2*std::asin(1.0);
     int count = 0;
-    for (std::complex<double> &element : fftwInVec)
+    const double x = PI;
+    for (double& element : fftwRealInVec)
     {
-        const double PI = 2*std::asin(1.0);
-        const double x = count * PI / (N - 1.0);
-
-        element = {0.0,  1/(x+1) };
-         
+        //const double x = count * PI / (N - 1.0);
+        //element = 1/(x+1);
+        element = x;
         count++;
     }
 
     count = 0;
-    for (std::complex<double>& element : naiveInVec)
+    for (double& element : naiveRealInVec)
     {
-        const double PI = 2 * std::asin(1.0);
-        const double x = count * PI / (N - 1.0);
-
-        element = {0.0,  1/(x+1) };
+        //const double PI = 2 * std::asin(1.0);
+        //const double x = count * PI / (N - 1.0);
+        //element = 1/(x+1);
+        element = x;
 
         count++;
     }
 
     Timer t;
     t.start();
-    fftwTransformer->fft(fftwInVec, fftwOutVec);
-    fftwTransformer->ifft(fftwOutVec, fftwInVec);
+    fftwTransformer->fft(fftwRealInVec, fftwOutVec);
+    fftwTransformer->ifft(fftwOutVec, fftwRealInVec);
     t.stop();
     Timer::milliseconds dur1 = t.duration();
 
     t.start();
-    naiveTransformer->fft(naiveInVec, naiveOutVec);
-    naiveTransformer->ifft(naiveOutVec, naiveInVec);
+    naiveTransformer->fft(naiveRealInVec, naiveOutVec);
+    naiveTransformer->ifft(naiveOutVec, naiveRealInVec);
     t.stop();
-    Timer::milliseconds dur2 = t.duration();
+    Timer::milliseconds dur3 = t.duration();
 
-    std::vector<double> results(N);
+    
+    std::vector<double> resultsReal(N);
+    std::vector<double> resultsComplex(N);
+    double resultsComplexL2Error = 0.0;
+    double resultsRealL2Error = 0.0;
     for (size_t i = 0; i < N; i++)
     {
-        double realPart = fftwInVec[i].real() - naiveInVec[i].real();
-        double imagPart = fftwInVec[i].imag() - naiveInVec[i].imag();
-        results[i] = std::sqrt(realPart * realPart + imagPart * imagPart);
+        resultsReal[i] = pow(fftwRealInVec[i] - naiveRealInVec[i], 2);
+        resultsRealL2Error += resultsReal[i];
+
+        resultsComplex[i] = pow(fftwOutVec[i].real() - naiveOutVec[i].real(), 2) + pow(fftwOutVec[i].imag() - naiveOutVec[i].imag(), 2);
+        resultsComplexL2Error += resultsComplex[i];
     }
+    resultsRealL2Error = sqrt(resultsRealL2Error/N);
+    resultsComplexL2Error = sqrt(resultsComplexL2Error/N);
+
+    std::cout << "Complex l2 error is: " << resultsComplexL2Error << std::endl;
+    std::cout << "Real l2 error is: " << resultsRealL2Error << std::endl;
 }
 
