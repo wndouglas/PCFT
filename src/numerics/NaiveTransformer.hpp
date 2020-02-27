@@ -12,8 +12,8 @@ namespace PCFT
 		public:
 			NaiveTransformer(const int N) : mNumElements(N) { }
 
-			void fft(const RealVec& inputVector, ComplexVec& outputVector) const override;
-			void ifft(const ComplexVec& inputVector, RealVec& outputVector) const override;
+			void fft(const ComplexVec& inputVector, ComplexVec& outputVector) const override;
+			void ifft(const ComplexVec& inputVector, ComplexVec& outputVector) const override;
 		private:
 			const int mNumElements;
 		};

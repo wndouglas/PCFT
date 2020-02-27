@@ -13,8 +13,8 @@ namespace PCFT
 			FFTWTransformer(const size_t N);
 			~FFTWTransformer();
 
-			void fft(const RealVec& inputVector, ComplexVec& outputVector) const override;
-			void ifft(const ComplexVec& inputVector, RealVec& outputVector) const override;
+			void fft(const ComplexVec& inputVector, ComplexVec& outputVector) const override;
+			void ifft(const ComplexVec& inputVector, ComplexVec& outputVector) const override;
 
 			size_t getNumPoints() const;
 			void setNumPoints(size_t N);

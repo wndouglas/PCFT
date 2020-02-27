@@ -15,7 +15,8 @@ Preprocessor::Preprocessor(std::unique_ptr<IFourierTransformer> transformer,
                     mDx(DomainParameters::getDx(pPackage.xMax, pPackage.xMin, pPackage.N)),
 					mDtau(DomainParameters::getDTau(pPackage.T, pPackage.M)),
 					mEpsilon1(pPackage.epsilon1),
-					mEpsilon2(pPackage.epsilon2) { }
+					mEpsilon2(pPackage.epsilon2),
+					mLambda(1) { }
 
 // The input vector here is the Green's function transform G, which we know in closed form.
 RVec Preprocessor::execute() const
@@ -28,7 +29,7 @@ RVec Preprocessor::execute() const
 	return tempOutput;
 }
 
-void Preprocessor::shiftedFft(CVec& inputVec, RVec& outputVec) const
+void Preprocessor::shiftedFft(CVec& inputVec, CVec& outputVec) const
 {
 	// The fourier transform mTransformer implements a normalised fourier transform (divided by sqrt(N)),
 	// summing from j = 0 to N-1.
@@ -46,7 +47,7 @@ void Preprocessor::shiftedFft(CVec& inputVec, RVec& outputVec) const
 	}
 }
 
-void Preprocessor::shiftedIfft(const RVec& inputVec, CVec& outputVec) const
+void Preprocessor::shiftedIfft(const CVec& inputVec, CVec& outputVec) const
 {
 	// The fourier transform mTransformer implements a normalised fourier transform (divided by sqrt(N)),
 	// summing from j = 0 to N-1.
