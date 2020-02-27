@@ -1,7 +1,9 @@
 out/
 build/
+
 *.vs*
 *.DS_Store
-wisdom_output
+
+wisdom_output*
 CMakeSettings.json
 

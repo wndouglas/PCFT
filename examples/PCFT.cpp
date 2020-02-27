@@ -35,24 +35,24 @@ void do_transform()
     IFourierTransformer::ComplexVec fftwOutVec(N), naiveOutVec(N);
     IFourierTransformer::RealVec fftwRealInVec(N), naiveRealInVec(N);
 
+    const double PI = 2*std::asin(1.0);
     int count = 0;
+    const double x = PI;
     for (double& element : fftwRealInVec)
     {
-        const double PI = 2*std::asin(1.0);
-        const double x = count * PI / (N - 1.0);
-
-        element = 1/(x+1);
-         
+        //const double x = count * PI / (N - 1.0);
+        //element = 1/(x+1);
+        element = x;
         count++;
     }
 
     count = 0;
     for (double& element : naiveRealInVec)
     {
-        const double PI = 2 * std::asin(1.0);
-        const double x = count * PI / (N - 1.0);
-
-        element = 1/(x+1);
+        //const double PI = 2 * std::asin(1.0);
+        //const double x = count * PI / (N - 1.0);
+        //element = 1/(x+1);
+        element = x;
 
         count++;
     }
