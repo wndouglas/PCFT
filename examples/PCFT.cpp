@@ -28,7 +28,7 @@ void do_transform()
     using namespace numerics;
     using namespace tools;
 
-    const int N = 10000;
+    int N = 100;
     std::unique_ptr<IFourierTransformer> fftwTransformer = FTFactory::instance(FTFactory::TransformType::FFT, N);
     std::unique_ptr<IFourierTransformer> naiveTransformer = FTFactory::instance(FTFactory::TransformType::Naive, N);
 
@@ -62,13 +62,13 @@ void do_transform()
     fftwTransformer->fft(fftwRealInVec, fftwOutVec);
     fftwTransformer->ifft(fftwOutVec, fftwRealInVec);
     t.stop();
-    Timer::milliseconds dur1 = t.duration();
+    Timer::milliseconds dur0 = t.duration();
 
     t.start();
     naiveTransformer->fft(naiveRealInVec, naiveOutVec);
     naiveTransformer->ifft(naiveOutVec, naiveRealInVec);
     t.stop();
-    Timer::milliseconds dur3 = t.duration();
+    Timer::milliseconds dur1 = t.duration();
 
     
     std::vector<double> resultsReal(N);
@@ -88,5 +88,39 @@ void do_transform()
 
     std::cout << "Complex l2 error is: " << resultsComplexL2Error << std::endl;
     std::cout << "Real l2 error is: " << resultsRealL2Error << std::endl;
+
+    // ************************ Test changing the transformer on the fly ****************************************
+    N = 1000;
+
+    fftwOutVec.resize(N);
+    naiveOutVec.resize(N);
+    fftwRealInVec.resize(N);
+    naiveRealInVec.resize(N);
+
+    count = 0;
+    for (double& element : fftwRealInVec)
+    {
+        element = x;
+        count++;
+    }
+
+    count = 0;
+    for (double& element : naiveRealInVec)
+    {
+        element = x;
+        count++;
+    }
+
+    t.start();
+    fftwTransformer->fft(fftwRealInVec, fftwOutVec);
+    fftwTransformer->ifft(fftwOutVec, fftwRealInVec);
+    t.stop();
+    Timer::milliseconds dur2 = t.duration();
+
+    t.start();
+    naiveTransformer->fft(naiveRealInVec, naiveOutVec);
+    naiveTransformer->ifft(naiveOutVec, naiveRealInVec);
+    t.stop();
+    Timer::milliseconds dur3 = t.duration();
 }
 

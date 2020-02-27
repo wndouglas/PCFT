@@ -49,7 +49,7 @@ namespace
 void NaiveTransformer::fft(const RVec& inputVector, CVec& outputVector) const
 {
     const size_t N = inputVector.size();
-    if (outputVector.size() != N || N != mNumElements)
+    if (outputVector.size() != N)
     {
         throw std::runtime_error("Invalid input vectors");
     }
@@ -66,7 +66,7 @@ void NaiveTransformer::fft(const RVec& inputVector, CVec& outputVector) const
 void NaiveTransformer::ifft(const CVec& inputVector, RVec& outputVector) const
 {
     const size_t N = inputVector.size();
-    if (outputVector.size() != N || N != mNumElements)
+    if (outputVector.size() != N)
     {
         throw std::runtime_error("Invalid input vectors");
     }
