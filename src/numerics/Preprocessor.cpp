@@ -7,20 +7,25 @@ typedef IFourierTransformer::RealVec RVec;
 typedef IFourierTransformer::ComplexVec CVec;
 
 Preprocessor::Preprocessor(std::unique_ptr<IFourierTransformer> transformer,
-				ParameterPackage pPackage) :
-                    mTransformer(std::move(transformer)), mN(pPackage.N), 
-                    mDx(ParameterPackage::getDx(pPackage.xMax, pPackage.xMin, pPackage.N)),
-					mDtau(ParameterPackage::getDTau(pPackage.T, pPackage.M)),
+				GFunction greensFunctionTransform,
+				DomainParameters pPackage) :
+                    mTransformer(std::move(transformer)),
+					mGreensFunctionTransform(greensFunctionTransform),
+					mN(pPackage.N), 
+                    mDx(DomainParameters::getDx(pPackage.xMax, pPackage.xMin, pPackage.N)),
+					mDtau(DomainParameters::getDTau(pPackage.T, pPackage.M)),
 					mEpsilon1(pPackage.epsilon1),
 					mEpsilon2(pPackage.epsilon2) { }
 
 // The input vector here is the Green's function transform G, which we know in closed form.
-void Preprocessor::execute(const RVec& inputVector, RVec& outputVector) const
+RVec Preprocessor::execute() const
 {
 	// Test implementation
-	CVec tempOutput(mN);
-	shiftedIfft(inputVector, tempOutput);
-	shiftedFft(tempOutput, outputVector);
+
+	RVec tempOutput(mN);
+	//shiftedIfft(inputVector, tempOutput);
+	//shiftedFft(tempOutput, outputVector);
+	return tempOutput;
 }
 
 void Preprocessor::shiftedFft(CVec& inputVec, RVec& outputVec) const

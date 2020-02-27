@@ -4,7 +4,7 @@
 #include "tools/Timer.hpp"
 #include "numerics/FTFactory.hpp"
 #include "numerics/Preprocessor.hpp"
-#include "ParameterPackage.hpp"
+#include "DomainParameters.hpp"
 #include <complex>
 #include <thread>
 #include <iostream>
@@ -53,23 +53,25 @@ void do_transform()
     Timer::milliseconds dur0 = t.duration();
 
     // Test usage of preprocessor
-    ParameterPackage pPackage 
+    DomainParameters pPackage 
     {
-        0,
+        1,
         N,
 
         0.0,
         0.0,
-        0.0,
+        1.0,
 
         0.0,
         0.0
     };
 
-    Preprocessor preprocessor(FTFactory::instance(FTFactory::TransformType::FFT, N), pPackage);
+    double r = 0.05;
+    double sigma = 0.2;
+    GFunction greensFunctionTransform(r, sigma, DomainParameters::getDTau(pPackage.T, pPackage.M));
+    Preprocessor preprocessor(FTFactory::instance(N), greensFunctionTransform, pPackage);
 
-    std::vector<double> preprocessorOutputVec(N);
-    preprocessor.execute(fftwRealInVec, preprocessorOutputVec);
+    std::vector<double> preprocessorOutputVec = preprocessor.execute();
 
     std::vector<double> resultsVec(N);
     double l2Error = 0.0;

@@ -1,9 +1,9 @@
-#ifndef PARAMETER_PACKAGE_HPP
-#define PARAMETER_PACKAGE_HPP
+#ifndef DOMAIN_PARAMETERS_HPP
+#define DOMAIN_PARAMETERS_HPP
 
 namespace PCFT
 {
-    class ParameterPackage
+    class DomainParameters
     {
     public:
         int M;
@@ -34,4 +34,4 @@ namespace PCFT
 }
 
 
-#endif // !PARAMETER_PACKAGE_HPP
+#endif // !DOMAIN_PARAMETERS_HPP

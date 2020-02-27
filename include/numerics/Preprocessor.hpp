@@ -3,7 +3,8 @@
 
 #include <vector>
 #include "numerics/IFourierTransformer.hpp"
-#include "ParameterPackage.hpp"
+#include "DomainParameters.hpp"
+#include "GFunction.hpp"
 
 namespace PCFT
 {
@@ -14,12 +15,14 @@ namespace PCFT
 		public:
 			Preprocessor(
 				std::unique_ptr<IFourierTransformer> transformer,
-				ParameterPackage pPackage);
+				GFunction greensFunctionTransform,
+				DomainParameters pPackage);
 
-			void execute(const IFourierTransformer::RealVec& inputVector, IFourierTransformer::RealVec& outputVector) const;
+			IFourierTransformer::RealVec execute() const;
 
 		private:
 			std::unique_ptr<IFourierTransformer> mTransformer;
+			GFunction mGreensFunctionTransform;
 			const int mN;
 			const double mDx;
 			const double mDtau;
