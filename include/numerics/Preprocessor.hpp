@@ -2,7 +2,8 @@
 #define PREPROCESSOR_HPP
 
 #include <vector>
-#include "IFourierTransformer.hpp"
+#include "numerics/IFourierTransformer.hpp"
+#include "ParameterPackage.hpp"
 
 namespace PCFT
 {
@@ -13,13 +14,9 @@ namespace PCFT
 		public:
 			Preprocessor(
 				std::unique_ptr<IFourierTransformer> transformer,
-				const int N,
-				const double dx, 
-				const double dTau, 
-				const double epsilon1,
-				const double epsilon2);
+				ParameterPackage pPackage);
 
-			void execute(const std::vector<double>& inputVector, std::vector<double>& outputVector);
+			void execute(const IFourierTransformer::RealVec& inputVector, IFourierTransformer::RealVec& outputVector) const;
 
 		private:
 			std::unique_ptr<IFourierTransformer> mTransformer;
@@ -28,6 +25,9 @@ namespace PCFT
 			const double mDtau;
 			const double mEpsilon1;
 			const double mEpsilon2;
+
+			void shiftedFft(IFourierTransformer::ComplexVec& inputVector, IFourierTransformer::RealVec& outputVector) const;
+			void shiftedIfft(const IFourierTransformer::RealVec& inputVector, IFourierTransformer::ComplexVec& outputVector) const;
 		};
 	}
 }

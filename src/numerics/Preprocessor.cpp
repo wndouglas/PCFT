@@ -1,18 +1,56 @@
 #include "numerics/Preprocessor.hpp"
 
+using namespace PCFT;
 using namespace PCFT::numerics;
-using namespace std;
+
+typedef IFourierTransformer::RealVec RVec;
+typedef IFourierTransformer::ComplexVec CVec;
 
 Preprocessor::Preprocessor(std::unique_ptr<IFourierTransformer> transformer,
-				const int N,
-				const double dx, 
-				const double dTau, 
-				const double epsilon1,
-				const double epsilon2) :
-                    mTransformer(std::move(transformer)), mN(N), 
-                    mDx(dx), mDtau(dTau), mEpsilon1(epsilon1), mEpsilon2(epsilon2) { }
+				ParameterPackage pPackage) :
+                    mTransformer(std::move(transformer)), mN(pPackage.N), 
+                    mDx(ParameterPackage::getDx(pPackage.xMax, pPackage.xMin, pPackage.N)),
+					mDtau(ParameterPackage::getDTau(pPackage.T, pPackage.M)),
+					mEpsilon1(pPackage.epsilon1),
+					mEpsilon2(pPackage.epsilon2) { }
 
-void Preprocessor::execute(const vector<double>& inputVector, vector<double>& outputVector)
+void Preprocessor::execute(const RVec& inputVector, RVec& outputVector) const
 {
-    //mTransformer->fft()
+	// Test implementation
+	CVec tempOutput(mN);
+	shiftedIfft(inputVector, tempOutput);
+	shiftedFft(tempOutput, outputVector);
+}
+
+void Preprocessor::shiftedFft(CVec& inputVec, RVec& outputVec) const
+{
+	// The fourier transform mTransformer implements a normalised fourier transform (divided by sqrt(N)),
+	// summing from j = 0 to N-1.
+	// We would like the FFT with no scaling term sqrt(N), beginning at -N/2 and summing up to N/2-.
+
+	for(auto& element : inputVec)
+	{
+		element.imag(-element.imag());
+	}
+	mTransformer->ifft(inputVec, outputVec);
+	double sqrtN = sqrt(mN);
+	for(auto& element : outputVec)
+	{
+		element = -element/sqrtN;
+	}
+}
+
+void Preprocessor::shiftedIfft(const RVec& inputVec, CVec& outputVec) const
+{
+	// The fourier transform mTransformer implements a normalised fourier transform (divided by sqrt(N)),
+	// summing from j = 0 to N-1.
+	// We would like the FFT with no scaling term sqrt(N), beginning at -N/2 and summing up to N/2-.
+
+	mTransformer->fft(inputVec, outputVec);
+	double sqrtN = sqrt(mN);
+	for(auto& element : outputVec)
+	{
+		element.real(-element.real()*sqrtN);
+		element.imag(element.imag()*sqrtN);
+	}
 }

@@ -3,6 +3,8 @@
 
 #include "tools/Timer.hpp"
 #include "numerics/FTFactory.hpp"
+#include "numerics/Preprocessor.hpp"
+#include "ParameterPackage.hpp"
 #include <complex>
 #include <thread>
 #include <iostream>
@@ -37,22 +39,18 @@ void do_transform()
 
     const double PI = 2*std::asin(1.0);
     int count = 0;
-    const double x = PI;
     for (double& element : fftwRealInVec)
     {
-        //const double x = count * PI / (N - 1.0);
-        //element = 1/(x+1);
-        element = x;
+        double x = count * PI / (N - 1.0);
+        element = 1/(x+1);
         count++;
     }
 
     count = 0;
     for (double& element : naiveRealInVec)
     {
-        //const double PI = 2 * std::asin(1.0);
-        //const double x = count * PI / (N - 1.0);
-        //element = 1/(x+1);
-        element = x;
+        double x = count * PI / (N - 1.0);
+        element = 1/(x+1);
 
         count++;
     }
@@ -89,38 +87,33 @@ void do_transform()
     std::cout << "Complex l2 error is: " << resultsComplexL2Error << std::endl;
     std::cout << "Real l2 error is: " << resultsRealL2Error << std::endl;
 
-    // ************************ Test changing the transformer on the fly ****************************************
-    N = 1000;
-
-    fftwOutVec.resize(N);
-    naiveOutVec.resize(N);
-    fftwRealInVec.resize(N);
-    naiveRealInVec.resize(N);
-
-    count = 0;
-    for (double& element : fftwRealInVec)
+    // Test usage of preprocessor
+    ParameterPackage pPackage 
     {
-        element = x;
-        count++;
-    }
+        0,
+        N,
 
-    count = 0;
-    for (double& element : naiveRealInVec)
+        0.0,
+        0.0,
+        0.0,
+
+        0.0,
+        0.0
+    };
+
+    Preprocessor preprocessor(FTFactory::instance(FTFactory::TransformType::FFT, N), pPackage);
+
+    std::vector<double> preprocessorOutputVec(N);
+    preprocessor.execute(fftwRealInVec, preprocessorOutputVec);
+
+    std::vector<double> resultsVec(N);
+    double l2Error = 0.0;
+    for(size_t i = 0; i < N; i++)
     {
-        element = x;
-        count++;
+        resultsVec[i] = pow(fftwRealInVec[i] - preprocessorOutputVec[i], 2);
+        l2Error += resultsVec[i];
     }
-
-    t.start();
-    fftwTransformer->fft(fftwRealInVec, fftwOutVec);
-    fftwTransformer->ifft(fftwOutVec, fftwRealInVec);
-    t.stop();
-    Timer::milliseconds dur2 = t.duration();
-
-    t.start();
-    naiveTransformer->fft(naiveRealInVec, naiveOutVec);
-    naiveTransformer->ifft(naiveOutVec, naiveRealInVec);
-    t.stop();
-    Timer::milliseconds dur3 = t.duration();
+    l2Error = sqrt(l2Error);
+    std::cout << "Results of preprocessor - l2 error: " << l2Error << std::endl;
 }
 
