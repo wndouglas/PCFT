@@ -3,6 +3,8 @@
 
 #include "tools/Timer.hpp"
 #include "numerics/FTFactory.hpp"
+#include "numerics/Preprocessor.hpp"
+#include "DomainParameters.hpp"
 #include <complex>
 #include <thread>
 #include <iostream>
@@ -28,65 +30,59 @@ void do_transform()
     using namespace numerics;
     using namespace tools;
 
-    const int N = 10000;
+    int N = 1'000'000;
     std::unique_ptr<IFourierTransformer> fftwTransformer = FTFactory::instance(FTFactory::TransformType::FFT, N);
-    std::unique_ptr<IFourierTransformer> naiveTransformer = FTFactory::instance(FTFactory::TransformType::Naive, N);
 
-    IFourierTransformer::ComplexVec fftwOutVec(N), naiveOutVec(N);
-    IFourierTransformer::RealVec fftwRealInVec(N), naiveRealInVec(N);
+    IFourierTransformer::ComplexVec fftwOutVec(N);
+    IFourierTransformer::ComplexVec fftwInVec(N);
 
     const double PI = 2*std::asin(1.0);
     int count = 0;
-    const double x = PI;
-    for (double& element : fftwRealInVec)
+    for (auto& element : fftwInVec)
     {
-        //const double x = count * PI / (N - 1.0);
-        //element = 1/(x+1);
-        element = x;
+        double x = count * PI / (N - 1.0);
+        element = {1/(x+1), 0.0};
         count++;
     }
 
-    count = 0;
-    for (double& element : naiveRealInVec)
-    {
-        //const double PI = 2 * std::asin(1.0);
-        //const double x = count * PI / (N - 1.0);
-        //element = 1/(x+1);
-        element = x;
-
-        count++;
-    }
+    IFourierTransformer::ComplexVec fftwTempInVec(fftwInVec);
 
     Timer t;
     t.start();
-    fftwTransformer->fft(fftwRealInVec, fftwOutVec);
-    fftwTransformer->ifft(fftwOutVec, fftwRealInVec);
+    fftwTransformer->fft(fftwInVec, fftwOutVec);
+    fftwTransformer->ifft(fftwOutVec, fftwInVec);
     t.stop();
-    Timer::milliseconds dur1 = t.duration();
+    Timer::milliseconds dur0 = t.duration();
 
-    t.start();
-    naiveTransformer->fft(naiveRealInVec, naiveOutVec);
-    naiveTransformer->ifft(naiveOutVec, naiveRealInVec);
-    t.stop();
-    Timer::milliseconds dur3 = t.duration();
-
-    
-    std::vector<double> resultsReal(N);
-    std::vector<double> resultsComplex(N);
-    double resultsComplexL2Error = 0.0;
-    double resultsRealL2Error = 0.0;
-    for (size_t i = 0; i < N; i++)
+    // Test usage of preprocessor
+    DomainParameters pPackage 
     {
-        resultsReal[i] = pow(fftwRealInVec[i] - naiveRealInVec[i], 2);
-        resultsRealL2Error += resultsReal[i];
+        1,
+        N,
 
-        resultsComplex[i] = pow(fftwOutVec[i].real() - naiveOutVec[i].real(), 2) + pow(fftwOutVec[i].imag() - naiveOutVec[i].imag(), 2);
-        resultsComplexL2Error += resultsComplex[i];
+        0.0,
+        0.0,
+        1.0,
+
+        0.0,
+        0.0
+    };
+
+    double r = 0.05;
+    double sigma = 0.2;
+    GFunction greensFunctionTransform(r, sigma, DomainParameters::getDTau(pPackage.T, pPackage.M));
+    Preprocessor preprocessor(FTFactory::instance(N), greensFunctionTransform, pPackage);
+
+    //std::vector<double> preprocessorOutputVec = preprocessor.execute();
+
+    std::vector<double> resultsVec(N);
+    double l2Error = 0.0;
+    for(size_t i = 0; i < N; i++)
+    {
+        resultsVec[i] = pow(fftwInVec[i].real() - fftwTempInVec[i].real(), 2) + pow(fftwInVec[i].imag() - fftwTempInVec[i].imag(), 2);
+        l2Error += resultsVec[i];
     }
-    resultsRealL2Error = sqrt(resultsRealL2Error/N);
-    resultsComplexL2Error = sqrt(resultsComplexL2Error/N);
-
-    std::cout << "Complex l2 error is: " << resultsComplexL2Error << std::endl;
-    std::cout << "Real l2 error is: " << resultsRealL2Error << std::endl;
+    l2Error = sqrt(l2Error/N);
+    std::cout << "Results of preprocessor - l2 error: " << l2Error << std::endl;
 }
 

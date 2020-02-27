@@ -6,8 +6,8 @@ typedef std::unique_ptr<IFourierTransformer> pTransformer;
 
 void arrange_transforms(pTransformer& fftwTransformer,
 pTransformer& naiveTransformer,
-IFourierTransformer::RealVec& fftwInVec,IFourierTransformer::ComplexVec& fftwOutVec,
-IFourierTransformer::RealVec& naiveInVec, IFourierTransformer::ComplexVec& naiveOutVec,
+IFourierTransformer::ComplexVec& fftwInVec,IFourierTransformer::ComplexVec& fftwOutVec,
+IFourierTransformer::ComplexVec& naiveInVec, IFourierTransformer::ComplexVec& naiveOutVec,
 size_t N)
 {
     fftwTransformer = FTFactory::instance(FTFactory::TransformType::FFT, N);
@@ -18,23 +18,23 @@ size_t N)
     naiveInVec.resize(N);
     naiveOutVec.resize(N);
     int count = 0;
-    for (double& element : fftwInVec)
+    for (auto& element : fftwInVec)
     {
         const double PI = 2*std::asin(1.0);
         const double x = count * PI / (N - 1);
 
-        element = std::sin(x);
+        element = {std::sin(x), x};
          
         count++;
     }
 
     count = 0;
-    for (double& element : naiveInVec)
+    for (auto& element : naiveInVec)
     {
         const double PI = 2 * std::asin(1.0);
         const double x = count * PI / (N - 1.0);
 
-        element = std::sin(x);
+        element = {std::sin(x), x};
 
         count++;
     }
@@ -44,7 +44,7 @@ TEST_CASE( "Fourier transform followed by its reverse should be identity operati
 {
     // Arrange
     pTransformer fftwTransformer, naiveTransformer;
-    IFourierTransformer::RealVec fftwInVec, naiveInVec;
+    IFourierTransformer::ComplexVec fftwInVec, naiveInVec;
     IFourierTransformer::ComplexVec fftwOutVec, naiveOutVec;
     size_t N = 10000;
     arrange_transforms(fftwTransformer, naiveTransformer, fftwInVec, fftwOutVec, 
@@ -61,7 +61,7 @@ TEST_CASE( "Fourier transform followed by its reverse should be identity operati
     bool toleranceMet = true;
     for (size_t i = 0; i < N; i++)
     {
-        double result = fftwInVec[i] - naiveInVec[i];
+        double result = sqrt(pow(fftwInVec[i].real() - naiveInVec[i].real(), 2) + pow(fftwInVec[i].imag() - naiveInVec[i].imag(), 2));
         if(fabs(result) >= 1e-8)
         {
             toleranceMet = false;

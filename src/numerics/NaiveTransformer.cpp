@@ -46,27 +46,20 @@ namespace
     }
 }
 
-void NaiveTransformer::fft(const RVec& inputVector, CVec& outputVector) const
+void NaiveTransformer::fft(const CVec& inputVector, CVec& outputVector) const
 {
     const size_t N = inputVector.size();
-    if (outputVector.size() != N || N != mNumElements)
+    if (outputVector.size() != N)
     {
         throw std::runtime_error("Invalid input vectors");
     }
-
-    CVec inputVecComplex(N);
-    for(size_t k = 0; k < N; k++)
-    {
-        inputVecComplex[k].real(inputVector[k]);
-    }
-
-    complex_fft(inputVecComplex, outputVector);
+    complex_fft(inputVector, outputVector);
 }
 
-void NaiveTransformer::ifft(const CVec& inputVector, RVec& outputVector) const
+void NaiveTransformer::ifft(const CVec& inputVector, CVec& outputVector) const
 {
     const size_t N = inputVector.size();
-    if (outputVector.size() != N || N != mNumElements)
+    if (outputVector.size() != N)
     {
         throw std::runtime_error("Invalid input vectors");
     }

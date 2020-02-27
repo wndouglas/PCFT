@@ -1,4 +1,7 @@
-#include "IFourierTransformer.hpp"
+#ifndef FT_FACTORY_HPP
+#define FT_FACTORY_HPP
+
+#include "numerics/IFourierTransformer.hpp"
 
 namespace PCFT
 {
@@ -18,3 +21,5 @@ namespace PCFT
         };
     }
 }
+
+#endif // !FT_FACTORY_HPP
