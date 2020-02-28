@@ -30,29 +30,9 @@ void do_transform()
     using namespace numerics;
     using namespace tools;
 
-    int N = 1'000'000;
-    std::unique_ptr<IFourierTransformer> fftwTransformer = FTFactory::instance(FTFactory::TransformType::FFT, N);
-
-    IFourierTransformer::ComplexVec fftwOutVec(N);
-    IFourierTransformer::ComplexVec fftwInVec(N);
-
-    const double PI = 2*std::asin(1.0);
-    int count = 0;
-    for (auto& element : fftwInVec)
-    {
-        double x = count * PI / (N - 1.0);
-        element = {1/(x+1), 0.0};
-        count++;
-    }
-
-    IFourierTransformer::ComplexVec fftwTempInVec(fftwInVec);
-
-    Timer t;
-    t.start();
-    fftwTransformer->fft(fftwInVec, fftwOutVec);
-    fftwTransformer->ifft(fftwOutVec, fftwInVec);
-    t.stop();
-    Timer::milliseconds dur0 = t.duration();
+    const int N = 1'000;
+    double r = 0.05;
+    double sigma = 0.2;
 
     // Test usage of preprocessor
     DomainParameters pPackage 
@@ -60,29 +40,21 @@ void do_transform()
         1,
         N,
 
-        0.0,
-        0.0,
+        -1.0,
+        1.0,
         1.0,
 
         0.0,
         0.0
     };
 
-    double r = 0.05;
-    double sigma = 0.2;
-    GFunction greensFunctionTransform(r, sigma, DomainParameters::getDTau(pPackage.T, pPackage.M));
-    Preprocessor preprocessor(FTFactory::instance(N), greensFunctionTransform, pPackage);
+    GFunction greensFunctionTransform(r, sigma, getDTau(pPackage.T, pPackage.M));
+    Preprocessor preprocessor(FTFactory::instance(FTFactory::TransformType::FFT, N), pPackage);
 
-    //std::vector<double> preprocessorOutputVec = preprocessor.execute();
-
-    std::vector<double> resultsVec(N);
-    double l2Error = 0.0;
-    for(size_t i = 0; i < N; i++)
-    {
-        resultsVec[i] = pow(fftwInVec[i].real() - fftwTempInVec[i].real(), 2) + pow(fftwInVec[i].imag() - fftwTempInVec[i].imag(), 2);
-        l2Error += resultsVec[i];
-    }
-    l2Error = sqrt(l2Error/N);
-    std::cout << "Results of preprocessor - l2 error: " << l2Error << std::endl;
+    Timer t;
+    t.start();
+    IFourierTransformer::RealVec l2Err = preprocessor.execute(greensFunctionTransform);
+    t.stop();
+    auto timeTaken = t.duration();
 }
 

@@ -15,16 +15,17 @@ namespace PCFT
 		public:
 			Preprocessor(
 				std::unique_ptr<IFourierTransformer> transformer,
-				GFunction greensFunctionTransform,
 				DomainParameters pPackage);
 
-			IFourierTransformer::RealVec execute() const;
+			IFourierTransformer::RealVec execute(const GFunction& GreenTransformFunction) const;
 
 		private:
 			std::unique_ptr<IFourierTransformer> mTransformer;
-			GFunction mGreensFunctionTransform;
 			const int mN;
+			const int mP;
 			int mLambda;
+			const double mXMin;
+			const double mXMax;
 			const double mDx;
 			const double mDtau;
 			const double mEpsilon1;
@@ -32,7 +33,7 @@ namespace PCFT
 
 			void shiftedFft(IFourierTransformer::ComplexVec& inputVector, IFourierTransformer::ComplexVec& outputVector) const;
 			void shiftedIfft(const IFourierTransformer::ComplexVec& inputVector, IFourierTransformer::ComplexVec& outputVector) const;
-			//void calculateH()
+			void calculateH(IFourierTransformer::ComplexVec& vector, const GFunction& greensFunctionTransform) const;
 		};
 	}
 }

@@ -59,7 +59,7 @@ public:
         for(int i = 0; i < mNumElements; i++)
         {
             mIn[i][0] = inputVec[i].real();
-            mOut[i][1] = inputVec[i].imag();
+            mIn[i][1] = inputVec[i].imag();
         }
 
         fftw_execute(mPlanFw);

@@ -40,7 +40,7 @@ namespace
                 outputElement.real(outputElement.real() + x1 * x2 - y1 * y2);
                 outputElement.imag(outputElement.imag() + x1 * y2 + x2 * y1);
             }
-            outputElement.real(outputElement.real()/std::sqrt(N));
+            outputElement.real(outputElement.real() / std::sqrt(N));
             outputElement.imag(outputElement.imag() / std::sqrt(N));
         }
     }
@@ -75,6 +75,6 @@ void NaiveTransformer::ifft(const CVec& inputVector, CVec& outputVector) const
 
     for(size_t i = 0; i < N; i++)
     {
-        outputVector[i] = tempOutputVector[i].real();
+        outputVector[i] = tempOutputVector[i];
     } 
 }

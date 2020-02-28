@@ -16,12 +16,17 @@ namespace PCFT
             mConstantTerm{-r, 0.0}
         { }
 
-        std::complex<double> operator()(double omega)
+        std::complex<double> operator()(double omega) const
         {
             std::complex<double> omegaSquared = omega*omega;
             std::complex<double> linearTerm = omega*mLinearTerm;
+            std::complex<double> logTerm = (omegaSquared*mQuadraticTerm + omega*linearTerm + mConstantTerm)*mDTau;
             
-            return std::exp((omegaSquared*mQuadraticTerm + omega*linearTerm + mConstantTerm)*mDTau);
+            // This is definitely wrong
+            double mag = abs(logTerm);
+            double compArg = arg(logTerm);
+            std::complex<double> outTerm = {mag*cos(compArg), mag*sin(compArg)};
+            return outTerm;
         }
 
     private:
