@@ -70,3 +70,34 @@ TEST_CASE( "Fourier transform followed by its reverse should be identity operati
     }
     REQUIRE(toleranceMet);
 }
+
+TEST_CASE( "Fourier inverse transform followed by its reverse should be identity operation", "[transform]" )
+{
+    // Arrange
+    pTransformer fftwTransformer, naiveTransformer;
+    IFourierTransformer::ComplexVec fftwInVec, naiveInVec;
+    IFourierTransformer::ComplexVec fftwOutVec, naiveOutVec;
+    size_t N = 10000;
+    arrange_transforms(fftwTransformer, naiveTransformer, fftwInVec, fftwOutVec, 
+        naiveInVec, naiveOutVec, N);
+
+    // Act
+    fftwTransformer->ifft(fftwOutVec, fftwInVec);
+    fftwTransformer->fft(fftwInVec, fftwOutVec);
+
+    naiveTransformer->ifft(naiveOutVec, naiveInVec);
+    naiveTransformer->fft(naiveInVec, naiveOutVec);
+
+    // Assert
+    bool toleranceMet = true;
+    for (size_t i = 0; i < N; i++)
+    {
+        double result = sqrt(pow(fftwInVec[i].real() - naiveInVec[i].real(), 2) + pow(fftwInVec[i].imag() - naiveInVec[i].imag(), 2));
+        if(fabs(result) >= 1e-8)
+        {
+            toleranceMet = false;
+            break;
+        }
+    }
+    REQUIRE(toleranceMet);
+}
