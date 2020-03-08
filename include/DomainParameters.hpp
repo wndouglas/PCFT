@@ -3,23 +3,9 @@
 
 namespace PCFT
 {
-    static double getP(double xMax, double xMin)
+    class DomainParameters
     {
-        return xMax - xMin;
-    }
-
-    static double getDx(double xMax, double xMin, int N)
-    {
-        return getP(xMax, xMin)/N;
-    }
-
-    static double getDTau(double T, int M)
-    {
-        return T/M;
-    }
-
-    struct DomainParameters
-    {
+    public:
         int M;
         int N;
 
@@ -29,6 +15,21 @@ namespace PCFT
 
         double epsilon1;
         double epsilon2;
+
+        static double getP(double xMax, double xMin)
+        {
+            return xMax - xMin;
+        }
+
+        static double getDx(double xMax, double xMin, int N)
+        {
+            return getP(xMax, xMin)/N;
+        }
+
+        static double getDTau(double T, int M)
+        {
+            return T/M;
+        }
     };
 }
 
