@@ -31,6 +31,7 @@ Preprocessor::Preprocessor(std::unique_ptr<IFourierTransformer> transformer,
                     mTransformer(std::move(transformer)),
 					mGreensFunctionTransform(greensFunctionTransform),
 					mN(pPackage.N), 
+					mM(pPackage.M),
 					mP(DomainParameters::getP(pPackage.xMax, pPackage.xMin)),
                     mDx(DomainParameters::getDx(pPackage.xMax, pPackage.xMin, pPackage.N)),
 					mDtau(DomainParameters::getDTau(pPackage.T, pPackage.M)),
@@ -38,55 +39,31 @@ Preprocessor::Preprocessor(std::unique_ptr<IFourierTransformer> transformer,
 					mEpsilon2(pPackage.epsilon2) { }
 
 // The input vector here is the Green's function transform G, which we know in closed form.
-RVec Preprocessor::execute() const
+CVec Preprocessor::execute() const
 {
-	RVec outputVector(mN);
+	CVec GTilde(mN);
+	CVec gTildePrev(mN);
 	CVec gTilde(mN);
-	calculateLittlegTilde(gTilde, 1);
-	return outputVector;
-}
 
-void Preprocessor::shiftedFft(CVec& inputVec, CVec& outputVec) const
-{
-	// The fourier transform mTransformer implements a normalised fourier transform (divided by sqrt(N)),
-	// summing from j = 0 to N-1.
-	// We would like the FFT with no scaling term sqrt(N), beginning at -N/2 and summing up to N/2-.
-	const size_t N = inputVec.size();
-	CVec tempInput(N);
-	for (int r = 0; r < N; r++)
-	{
-		double flipper = 1 - (r % 2) * 2;
-		tempInput[r] = flipper * inputVec[r];
-	}
-	mTransformer->fft(inputVec, outputVec);
-	double sqrtN = sqrt(N);
-	for (int l = 0; l < N; l++)
-	{
-		double flipper = 1 - (l % 2) * 2;
-		outputVec[l] *= flipper/sqrt(N);
-	}
-}
+	int lambda = 1;
+	calculateLittlegTilde(gTildePrev, lambda);
 
-void Preprocessor::shiftedIfft(const CVec& inputVec, CVec& outputVec) const
-{
-	// The fourier transform mTransformer implements a normalised fourier transform (divided by sqrt(N)),
-	// summing from j = 0 to N-1.
-	// We would like the FFT with no scaling term sqrt(N), beginning at -N/2 and summing up to N/2-.
-	const size_t N = inputVec.size();
-	CVec tempInput(N);
-	for (int r = 0; r < N; r++)
+	lambda = 2;
+	double t1 = __DBL_MAX__;
+	double t2 = t1;
+	while(std::fabs(t1) >= mEpsilon1 ||
+		std::fabs(t2) >= mEpsilon2)
 	{
-		double flipper = 1 - (r % 2) * 2;
-		tempInput[r] = flipper * inputVec[r];
-	}
-	mTransformer->ifft(tempInput, outputVec);
-	double sqrtN = sqrt(N);
+		calculateLittlegTilde(gTilde, lambda);
+		calculateGTilde(GTilde, gTilde);
 
-	for(int l = 0; l < N; l++)
-	{
-		double flipper = 1 - (l % 2) * 2;
-		outputVec[l] *= flipper*std::exp(std::complex<double>(0.0, 0.5*N*PI))*sqrt(N);
+		t1 = test1(gTilde);
+		t2 = test2(gTilde, gTildePrev);
+		lambda *= 2;
+		std::copy(gTilde.begin(), gTilde.end(), gTildePrev.begin());
 	}
+
+	return GTilde;
 }
 
 void Preprocessor::calculateH(IFourierTransformer::ComplexVec& HOut, int lambda) const
@@ -106,13 +83,12 @@ void Preprocessor::calculateH(IFourierTransformer::ComplexVec& HOut, int lambda)
 void Preprocessor::calculateLittleh(IFourierTransformer::ComplexVec& hOut, int lambda) const
 {
 	calculateH(hOut, lambda);
-	CVec tempOut(hOut.size());
-	shiftedIfft(hOut, tempOut);
+	mTransformer->shiftedIfft(hOut, hOut);
 
 	int mNLambda = mN * lambda;
 	for (int i = 0; i < mNLambda; i++)
 	{
-		hOut[i] = tempOut[i] / mP;
+		hOut[i] /= mP;
 	}
 }
 
@@ -136,3 +112,39 @@ void Preprocessor::calculateLittlegTilde(IFourierTransformer::ComplexVec& gOut, 
 	}
 }
 
+void Preprocessor::calculateGTilde(IFourierTransformer::ComplexVec& GTilde, const IFourierTransformer::ComplexVec& gTilde) const
+{
+	GTilde.resize(gTilde.size());
+	mTransformer->shiftedFft(gTilde, GTilde);
+
+
+	for (int i = 0; i < GTilde.size(); i++)
+	{
+		GTilde[i] *= mP;
+	}
+}
+
+double Preprocessor::test1(const IFourierTransformer::ComplexVec& gTilde) const
+{
+	double output = 0.0;
+	for(int i = 0; i < mN; i++)
+	{
+		output += std::min(gTilde[i].real(), 0.0);
+	}
+	output *= -mM*mDx;
+	return output;
+}
+
+double Preprocessor::test2(const IFourierTransformer::ComplexVec& gTilde, const IFourierTransformer::ComplexVec& gTildePrev) const
+{
+	double runningMax = 0.0;
+	for(int i = 0; i < mN; i++)
+	{
+		double currMax = std::fabs(gTilde[i].real() - gTildePrev[i].real());
+		if(currMax >= runningMax)
+		{
+			runningMax = currMax;
+		}
+	}
+	return mDx*runningMax;
+}

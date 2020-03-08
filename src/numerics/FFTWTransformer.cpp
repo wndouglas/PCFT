@@ -147,3 +147,40 @@ void FFTWTransformer::ifft(const CVec& inputVector, CVec& outputVector) const
 
     mImpl->ifft(inputVector, outputVector);
 }
+
+void FFTWTransformer::shiftedFft(const ComplexVec& inputVector, ComplexVec& outputVector) const
+{
+	const size_t N = inputVector.size();
+	CVec tempInput(N);
+	for (int r = 0; r < N; r++)
+	{
+		double flipper = 1 - (r % 2) * 2;
+		tempInput[r] = flipper * inputVector[r];
+	}
+	fft(inputVector, outputVector);
+	double sqrtN = sqrt(N);
+	for (int l = 0; l < N; l++)
+	{
+		double flipper = 1 - (l % 2) * 2;
+		outputVector[l] *= flipper/sqrt(N);
+	}
+}
+
+void FFTWTransformer::shiftedIfft(const ComplexVec& inputVector, ComplexVec& outputVector) const
+{
+	const size_t N = inputVector.size();
+	CVec tempInput(N);
+	for (int r = 0; r < N; r++)
+	{
+		double flipper = 1 - (r % 2) * 2;
+		tempInput[r] = flipper * inputVector[r];
+	}
+	ifft(tempInput, outputVector);
+	double sqrtN = sqrt(N);
+
+	for(int l = 0; l < N; l++)
+	{
+		double flipper = 1 - (l % 2) * 2;
+		outputVector[l] *= flipper*sqrt(N);
+	}
+}

@@ -16,6 +16,9 @@ namespace PCFT
 			void fft(const ComplexVec& inputVector, ComplexVec& outputVector) const override;
 			void ifft(const ComplexVec& inputVector, ComplexVec& outputVector) const override;
 
+			void shiftedFft(const ComplexVec& inputVector, ComplexVec& outputVector) const override;
+			void shiftedIfft(const ComplexVec& inputVector, ComplexVec& outputVector) const override;
+
 			size_t getNumPoints() const;
 			void setNumPoints(size_t N);
 

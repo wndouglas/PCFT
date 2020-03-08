@@ -20,6 +20,10 @@ namespace numerics
 		virtual void fft(const ComplexVec& inputVector, ComplexVec& outputVector) const = 0;
 		virtual void ifft(const ComplexVec& inputVector, ComplexVec& outputVector) const = 0;
 
+		virtual void shiftedFft(const ComplexVec& inputVector, ComplexVec& outputVector) const = 0;
+		virtual void shiftedIfft(const ComplexVec& inputVector, ComplexVec& outputVector) const = 0;
+
+
 		virtual ~IFourierTransformer() { };
 	};
 }
