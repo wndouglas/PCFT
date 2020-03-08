@@ -11,7 +11,7 @@ namespace PCFT
     public:
         GFunction(double r, double sigma, double dTau) :
             mDTau(dTau),
-            mQuadraticTerm{-sigma*sigma*2*numerics::PI, 0.0},
+            mQuadraticTerm{-sigma*sigma*2*numerics::PI*numerics::PI, 0.0},
             mLinearTerm{0.0, (2*r - sigma*sigma)*numerics::PI},
             mConstantTerm{-r, 0.0}
         { }
@@ -19,8 +19,7 @@ namespace PCFT
         std::complex<double> operator()(double omega) const
         {
             std::complex<double> omegaSquared = omega*omega;
-            std::complex<double> linearTerm = omega*mLinearTerm;
-            std::complex<double> logTerm = (omegaSquared*mQuadraticTerm + omega*linearTerm + mConstantTerm)*mDTau;
+            std::complex<double> logTerm = (omegaSquared*mQuadraticTerm + omega*mLinearTerm + mConstantTerm)*mDTau;
             
             return std::exp(logTerm);
         }

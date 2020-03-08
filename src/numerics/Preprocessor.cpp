@@ -85,7 +85,7 @@ void Preprocessor::shiftedIfft(const CVec& inputVec, CVec& outputVec) const
 	for(int l = 0; l < N; l++)
 	{
 		double flipper = 1 - (l % 2) * 2;
-		outputVec[l] *= flipper*sqrt(N);
+		outputVec[l] *= flipper*std::exp(std::complex<double>(0.0, 0.5*N*PI))*sqrt(N);
 	}
 }
 
@@ -99,9 +99,7 @@ void Preprocessor::calculateH(IFourierTransformer::ComplexVec& HOut, int lambda)
 		int k = i - mNLambda / 2;
 		double omegaK = k / mP;
 		double xIn = PI * omegaK * mDx;
-
-		//HOut[i] = sincSquared(xIn) * mGreensFunctionTransform(omegaK);
-		HOut[i] = mGreensFunctionTransform(omegaK);
+		HOut[i] = sincSquared(xIn) * mGreensFunctionTransform(omegaK);
 	}
 }
 
