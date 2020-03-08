@@ -73,7 +73,7 @@ void do_transform()
     GFunction greensFunctionTransform(r, sigma, DomainParameters::getDTau(pPackage.T, pPackage.M));
     Preprocessor preprocessor(FTFactory::instance(N), greensFunctionTransform, pPackage);
 
-    //std::vector<double> preprocessorOutputVec = preprocessor.execute();
+    std::vector<double> preprocessorOutputVec = preprocessor.execute();
 
     std::vector<double> resultsVec(N);
     double l2Error = 0.0;
@@ -84,5 +84,7 @@ void do_transform()
     }
     l2Error = sqrt(l2Error/N);
     std::cout << "Results of preprocessor - l2 error: " << l2Error << std::endl;
+
+    int k = 0;
 }
 

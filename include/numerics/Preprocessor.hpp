@@ -24,7 +24,6 @@ namespace PCFT
 			std::unique_ptr<IFourierTransformer> mTransformer;
 			GFunction mGreensFunctionTransform;
 			const int mN;
-			int mLambda;
 			const double mDx;
 			const double mDtau;
 			const double mEpsilon1;
@@ -32,7 +31,7 @@ namespace PCFT
 
 			void shiftedFft(IFourierTransformer::ComplexVec& inputVector, IFourierTransformer::ComplexVec& outputVector) const;
 			void shiftedIfft(const IFourierTransformer::ComplexVec& inputVector, IFourierTransformer::ComplexVec& outputVector) const;
-			//void calculateH()
+			void calculateH(IFourierTransformer::ComplexVec& HOut, int lambda) const;
 		};
 	}
 }
