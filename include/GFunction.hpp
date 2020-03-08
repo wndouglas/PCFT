@@ -22,11 +22,7 @@ namespace PCFT
             std::complex<double> linearTerm = omega*mLinearTerm;
             std::complex<double> logTerm = (omegaSquared*mQuadraticTerm + omega*linearTerm + mConstantTerm)*mDTau;
             
-            // This is definitely wrong
-            double mag = abs(logTerm);
-            double compArg = arg(logTerm);
-            std::complex<double> outTerm = {mag*cos(compArg), mag*sin(compArg)};
-            return outTerm;
+            return std::exp(logTerm);
         }
 
     private:
