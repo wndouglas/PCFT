@@ -25,28 +25,25 @@ namespace
 }
 
 
-Preprocessor::Preprocessor(std::unique_ptr<IFourierTransformer> transformer,
-				GFunction greensFunctionTransform,
-				DomainParameters pPackage) :
-                    mTransformer(std::move(transformer)),
-					mGreensFunctionTransform(greensFunctionTransform),
-					mN(pPackage.N), 
-					mM(pPackage.M),
-					mP(DomainParameters::getP(pPackage.xMax, pPackage.xMin)),
-                    mDx(DomainParameters::getDx(pPackage.xMax, pPackage.xMin, pPackage.N)),
-					mDtau(DomainParameters::getDTau(pPackage.T, pPackage.M)),
-					mEpsilon1(pPackage.epsilon1),
-					mEpsilon2(pPackage.epsilon2) { }
+Preprocessor::Preprocessor(GFunction greensFunctionTransform) : mGreensFunctionTransform(greensFunctionTransform) { }
 
 // The input vector here is the Green's function transform G, which we know in closed form.
-CVec Preprocessor::execute() const
+CVec Preprocessor::execute(const std::unique_ptr<IFourierTransformer>& transformer, const DomainParameters& pPackage)
 {
-	CVec GTilde(mN);
-	CVec gTildePrev(mN);
-	CVec gTilde(mN);
+	const int N = pPackage.N;
+	const int M = pPackage.M;
+	const double P = DomainParameters::getP(pPackage.xMax, pPackage.xMin);
+	const double dx = DomainParameters::getDx(pPackage.xMax, pPackage.xMin, pPackage.N);
+	const double dtau = DomainParameters::getDTau(pPackage.T, pPackage.M);
+	const double mEpsilon1 = pPackage.epsilon1;
+	const double mEpsilon2 = pPackage.epsilon2;
+
+	CVec GTilde(N);
+	CVec gTildePrev(N);
+	CVec gTilde(N);
 
 	int lambda = 1;
-	calculateLittlegTilde(gTildePrev, lambda);
+	calculateLittlegTilde(gTildePrev, transformer, lambda, N, P, dx);
 
 	lambda = 2;
 	double t1 = __DBL_MAX__;
@@ -54,11 +51,11 @@ CVec Preprocessor::execute() const
 	while(std::fabs(t1) >= mEpsilon1 ||
 		std::fabs(t2) >= mEpsilon2)
 	{
-		calculateLittlegTilde(gTilde, lambda);
-		calculateGTilde(GTilde, gTilde);
+		calculateLittlegTilde(gTilde, transformer, lambda, N, P, dx);
+		calculateGTilde(GTilde, gTilde, transformer, P);
 
-		t1 = test1(gTilde);
-		t2 = test2(gTilde, gTildePrev);
+		t1 = test1(gTilde, N, M, dx);
+		t2 = test2(gTilde, gTildePrev, N, dx);
 		lambda *= 2;
 		std::copy(gTilde.begin(), gTilde.end(), gTildePrev.begin());
 	}
@@ -66,79 +63,89 @@ CVec Preprocessor::execute() const
 	return GTilde;
 }
 
-void Preprocessor::calculateH(IFourierTransformer::ComplexVec& HOut, int lambda) const
+void Preprocessor::calculateH(IFourierTransformer::ComplexVec& HOut,
+							  const int lambda, const int N, const double P, const double dx) const
 {
 	// resize Hout
-	int mNLambda = mN * lambda;
+	int mNLambda = N * lambda;
 	// Calculate H
 	for (int i = 0; i < mNLambda; i++)
 	{
 		int k = i - mNLambda / 2;
-		double omegaK = k / mP;
-		double xIn = PI * omegaK * mDx;
+		double omegaK = k / P;
+		double xIn = PI * omegaK * dx;
 		HOut[i] = sincSquared(xIn) * mGreensFunctionTransform(omegaK);
 	}
 }
 
-void Preprocessor::calculateLittleh(IFourierTransformer::ComplexVec& hOut, int lambda) const
+void Preprocessor::calculateLittleh(IFourierTransformer::ComplexVec& hOut,
+								    const std::unique_ptr<IFourierTransformer>& transformer,
+									int lambda, const int N, const double P, const double dx) const
 {
-	calculateH(hOut, lambda);
-	mTransformer->shiftedIfft(hOut, hOut);
+	calculateH(hOut, lambda, N, P, dx);
+	transformer->shiftedIfft(hOut, hOut);
 
-	int mNLambda = mN * lambda;
-	for (int i = 0; i < mNLambda; i++)
+	int NLambda = N * lambda;
+	for (int i = 0; i < NLambda; i++)
 	{
-		hOut[i] /= mP;
+		hOut[i] /= P;
 	}
 }
 
-void Preprocessor::calculateLittlegTilde(IFourierTransformer::ComplexVec& gOut, int lambda) const
+void Preprocessor::calculateLittlegTilde(IFourierTransformer::ComplexVec& gOut,
+										 const std::unique_ptr<IFourierTransformer>& transformer,
+										 int lambda, const int N, const double P, const double dx) const
 {
-	int mNLambda = mN * lambda;
-	if (mN % 2 != 0 || mNLambda % 2 != 0)
+	int NLambda = N * lambda;
+	if (N % 2 != 0 || NLambda % 2 != 0)
 	{
 		throw std::runtime_error("Invalid input argument");
 	}
 
-	CVec hOut(mNLambda);
-	calculateLittleh(hOut, lambda);
+	CVec hOut(NLambda);
+	calculateLittleh(hOut, transformer, lambda, N, P, dx);
 
-	for (int i = 0; i < mN; i++)
+	for (int i = 0; i < N; i++)
 	{
-		int j = i - mN / 2;
-		int l = lambda * j + mNLambda/2;
+		int j = i - N / 2;
+		int l = lambda * j + NLambda/2;
 
 		gOut[i] = hOut[l];
 	}
 }
 
-void Preprocessor::calculateGTilde(IFourierTransformer::ComplexVec& GTilde, const IFourierTransformer::ComplexVec& gTilde) const
+void Preprocessor::calculateGTilde(IFourierTransformer::ComplexVec& GTilde,
+								   const IFourierTransformer::ComplexVec& gTilde,
+								   const std::unique_ptr<IFourierTransformer>& transformer,
+								   const double P) const
 {
 	GTilde.resize(gTilde.size());
-	mTransformer->shiftedFft(gTilde, GTilde);
+	transformer->shiftedFft(gTilde, GTilde);
 
 
 	for (int i = 0; i < GTilde.size(); i++)
 	{
-		GTilde[i] *= mP;
+		GTilde[i] *= P;
 	}
 }
 
-double Preprocessor::test1(const IFourierTransformer::ComplexVec& gTilde) const
+double Preprocessor::test1(const IFourierTransformer::ComplexVec& gTilde, 
+						   const int N, const int M, const double dx) const
 {
 	double output = 0.0;
-	for(int i = 0; i < mN; i++)
+	for(int i = 0; i < N; i++)
 	{
 		output += std::min(gTilde[i].real(), 0.0);
 	}
-	output *= -mM*mDx;
+	output *= -M*dx;
 	return output;
 }
 
-double Preprocessor::test2(const IFourierTransformer::ComplexVec& gTilde, const IFourierTransformer::ComplexVec& gTildePrev) const
+double Preprocessor::test2(const IFourierTransformer::ComplexVec& gTilde,
+						   const IFourierTransformer::ComplexVec& gTildePrev, const int N, const double dx) const
 {
 	double runningMax = 0.0;
-	for(int i = 0; i < mN; i++)
+	for(int i = 0; i < N; i++)
 	{
 		double currMax = std::fabs(gTilde[i].real() - gTildePrev[i].real());
 		if(currMax >= runningMax)
@@ -146,5 +153,5 @@ double Preprocessor::test2(const IFourierTransformer::ComplexVec& gTilde, const 
 			runningMax = currMax;
 		}
 	}
-	return mDx*runningMax;
+	return dx*runningMax;
 }
