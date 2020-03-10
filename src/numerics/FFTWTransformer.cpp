@@ -157,12 +157,12 @@ void FFTWTransformer::shiftedFft(const ComplexVec& inputVector, ComplexVec& outp
 		double flipper = 1 - (r % 2) * 2;
 		tempInput[r] = flipper * inputVector[r];
 	}
-	fft(inputVector, outputVector);
+	fft(tempInput, outputVector);
 	double sqrtN = sqrt(N);
 	for (int l = 0; l < N; l++)
 	{
 		double flipper = 1 - (l % 2) * 2;
-		outputVector[l] *= flipper/sqrt(N);
+		outputVector[l] *= flipper/sqrtN;
 	}
 }
 
