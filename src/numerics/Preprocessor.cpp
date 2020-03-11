@@ -30,13 +30,16 @@ Preprocessor::Preprocessor(GFunction greensFunctionTransform) : mGreensFunctionT
 // The input vector here is the Green's function transform G, which we know in closed form.
 CVec Preprocessor::execute(const std::unique_ptr<IFourierTransformer>& transformer, const DomainParameters& pPackage)
 {
-	const int N = pPackage.N;
-	const int M = pPackage.M;
-	const double P = DomainParameters::getP(pPackage.xMax, pPackage.xMin);
-	const double dx = DomainParameters::getDx(pPackage.xMax, pPackage.xMin, pPackage.N);
 	const double dtau = DomainParameters::getDTau(pPackage.T, pPackage.M);
 	const double mEpsilon1 = pPackage.epsilon1;
 	const double mEpsilon2 = pPackage.epsilon2;
+
+    double xMin = pPackage.xMin;
+    double xMax = pPackage.xMax;
+    double P = DomainParameters::getP(xMax, xMin);
+    int N = pPackage.N;
+	int M = pPackage.M;
+	double dx = pPackage.getDx(xMax, xMin, N);
 
 	CVec GTilde(N);
 	CVec gTildePrev(N);

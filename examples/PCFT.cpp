@@ -57,68 +57,13 @@ void do_transform()
         1e-8,
         1e-8
     };
-
-    GFunction greensFunctionTransform(r, sigma, DomainParameters::getDTau(pPackage.T, pPackage.M));
-
-    PCFTExecutor executor(FTFactory::instance(N*2), std::make_unique<Preprocessor>(greensFunctionTransform), pPackage);
-    OutputPackage outputPackage;
-    executor.execute(outputPackage);
-
-    // IFourierTransformer::ComplexVec GOut = preprocessor->execute();
-
-    // // For now we try a European call
-    // double dx = DomainParameters::getDx(xMax, xMin, N);
-    // std::vector<double> SGrid(N);
-    // std::vector<double> SGridExtended(NExtended);
-    // std::vector<double> vGrid(N);
-    // std::vector<double> vGridExtended(NExtended);
-
-    // double x = xMin;
-    // for(int i = 0; i < N; i++)
-    // {
-    //     double S = std::exp(x);
-    //     SGrid[i] = S;
-    //     vGrid[i] = std::max(0.0, S - K);
-    //     x += dx;
-    // }
-
-    // x = xMinExtended;
-    // for(int i = 0; i < NExtended; i++)
-    // {
-    //     double S = std::exp(x);
-    //     vGridExtended[i] = std::max(0.0, S - K);
-    //     SGridExtended[i] = S;
-    //     x += dx;
-    // }
     
-    // std::unique_ptr<IFourierTransformer> transformer2 = FTFactory::instance(NExtended);
-    // IFourierTransformer::ComplexVec vTempGrid(NExtended);
-    // for(int i = 0; i < NExtended; i++)
-    // {
-    //     vTempGrid[i].real(vGridExtended[i]);
-    // }
+    PCFTExecutor executor(
+        FTFactory::instance(N*2),
+        std::make_unique<Preprocessor>(GFunction(r, sigma, DomainParameters::getDTau(pPackage.T, pPackage.M))),
+        pPackage);
 
-    // for(int m = 0; m < M; m++)
-    // {
-    //     transformer2->shiftedFft(vTempGrid, vTempGrid);
-    //     for(int i = 0; i < NExtended; i++)
-    //     {
-    //         vTempGrid[i] = vTempGrid[i] * GOut[i];
-    //     }
-    //     transformer2->shiftedIfft(vTempGrid, vTempGrid);
-
-    //     for(int i = 0; i < NExtended; i++)
-    //     {
-    //         if(i < N/2)
-    //         {
-    //             vTempGrid[i] = vTempGrid[N/2 + 1];
-    //         }
-    //         else if(i > 3*N/2)
-    //         {
-    //             vTempGrid[i] = SGridExtended[i] - K*exp(-r*T);
-    //         }
-    //     }
-    // }
-    // std::cout << "Done";
+    OutputPage outputPackage;
+    executor.execute(outputPackage);
 }
 

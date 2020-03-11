@@ -9,7 +9,7 @@ endif()
 # Add source to this project's library.
 set(PCFT_LIB "PCFT")
 set(PCFT_LIB ${PCFT_LIB} PARENT_SCOPE)
-add_library (${PCFT_LIB})
+add_library (${PCFT_LIB} PCFTExecutor.cpp)
 install(TARGETS ${PCFT_LIB} DESTINATION ${PCFT_INSTALL_BIN_DIR})
 
 # TODO: Add tests and install targets if needed.
