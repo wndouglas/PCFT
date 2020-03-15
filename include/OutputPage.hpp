@@ -8,7 +8,7 @@ namespace PCFT
     struct OutputPage
     {
         std::vector<double> times;
-        std::vector<double> space;
+        std::vector<double> state;
         std::vector<std::vector<double> > valueFunction;
         std::vector<std::vector<double> > policy;
     };

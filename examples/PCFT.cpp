@@ -10,30 +10,33 @@
 #include <cmath>
 #include <thread>
 #include <iostream>
+#include <fstream>
+#include <string>
 
 using namespace PCFT;
+using namespace std;
 
-void do_transform();
+void do_transform(string file_name);
+void output_to_file(string file_name, const OutputPage& op, const DomainParameters& inputPage, tools::Timer::milliseconds dur, const double r, const double sigma, const double T);
 
-int main()
+int main(int argc, const char * argv[])
 {
-    using namespace tools;
-    Timer t;
-    t.start();
-    do_transform();
-    t.stop();
-    Timer::milliseconds dur = t.duration();
+    std::string file_name = "PCFT_out.txt";
+    if (argc == 2)
+        file_name = argv[1];
+
+    do_transform(file_name);
 
 	return 0;
 }
 
-void do_transform()
+void do_transform(string file_name)
 {
     using namespace numerics;
     using namespace tools;
 
     int N = 100;
-    int M = 1;
+    int M = 10;
 
     // // Parameters
     // double K = 100.0;
@@ -63,7 +66,44 @@ void do_transform()
         std::make_unique<Preprocessor>(GFunction(r, sigma, DomainParameters::getDTau(pPackage.T, pPackage.M))),
         pPackage);
 
-    OutputPage outputPackage;
-    executor.execute(outputPackage);
+    OutputPage outPage;
+    Timer t;
+    t.start();
+    executor.execute(outPage);
+    t.stop();
+    Timer::milliseconds dur = t.duration();
+
+    output_to_file(file_name, outPage, pPackage, dur, r, sigma, T);
+}
+
+void output_to_file(string file_name,
+    const OutputPage& op,
+    const DomainParameters& pPackage, 
+    tools::Timer::milliseconds dur,
+    const double r, 
+    const double sigma, 
+    const double T)
+{
+    ofstream myfile;
+    myfile.open (file_name);
+    myfile << "-------------------- Input and parameters --------------------" << std::endl;
+    myfile << "M = " << pPackage.M 
+            << ", N = " << pPackage.N 
+            << ", x_min = " << pPackage.xMin 
+            << ", x_max = " << pPackage.xMax 
+            << std::endl;
+    myfile << "r = " << r << ", sigma = " << sigma << ", T = " << T << std::endl;
+    myfile << std::endl;
+
+    myfile << "-------------------- Output --------------------" << std::endl;
+    myfile << "Calculation time: " << dur << std::endl;
+    myfile << "S, V(S, 0)" << std::endl;
+
+    for (int i = 0; i < pPackage.N; i++)
+    {
+        myfile << op.state[i] << ", " << op.valueFunction[0][i] << std::endl;
+    }
+
+    myfile.close();
 }
 

@@ -28,7 +28,7 @@ namespace
 Preprocessor::Preprocessor(GFunction greensFunctionTransform) : mGreensFunctionTransform(greensFunctionTransform) { }
 
 // The input vector here is the Green's function transform G, which we know in closed form.
-CVec Preprocessor::execute(const std::unique_ptr<IFourierTransformer>& transformer, const DomainParameters& pPackage)
+CVec Preprocessor::execute(const IFourierTransformer* transformer, const DomainParameters& pPackage)
 {
 	const double dtau = DomainParameters::getDTau(pPackage.T, pPackage.M);
 	const double mEpsilon1 = pPackage.epsilon1;
@@ -82,7 +82,7 @@ void Preprocessor::calculateH(IFourierTransformer::ComplexVec& HOut,
 }
 
 void Preprocessor::calculateLittleh(IFourierTransformer::ComplexVec& hOut,
-								    const std::unique_ptr<IFourierTransformer>& transformer,
+								    const IFourierTransformer* transformer,
 									int lambda, const int N, const double P, const double dx) const
 {
 	calculateH(hOut, lambda, N, P, dx);
@@ -96,7 +96,7 @@ void Preprocessor::calculateLittleh(IFourierTransformer::ComplexVec& hOut,
 }
 
 void Preprocessor::calculateLittlegTilde(IFourierTransformer::ComplexVec& gOut,
-										 const std::unique_ptr<IFourierTransformer>& transformer,
+										 const IFourierTransformer* transformer,
 										 int lambda, const int N, const double P, const double dx) const
 {
 	int NLambda = N * lambda;
@@ -119,7 +119,7 @@ void Preprocessor::calculateLittlegTilde(IFourierTransformer::ComplexVec& gOut,
 
 void Preprocessor::calculateGTilde(IFourierTransformer::ComplexVec& GTilde,
 								   const IFourierTransformer::ComplexVec& gTilde,
-								   const std::unique_ptr<IFourierTransformer>& transformer,
+								   const IFourierTransformer* transformer,
 								   const double P) const
 {
 	GTilde.resize(gTilde.size());

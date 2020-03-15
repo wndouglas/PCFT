@@ -4,6 +4,6 @@ build/
 *.vs*
 *.DS_Store
 
-wisdom_output*
+wisdom_output_r
 CMakeSettings.json
 

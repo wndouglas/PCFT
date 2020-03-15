@@ -17,7 +17,7 @@ void PCFTExecutor::execute(OutputPage& outputPage)
         mParams.epsilon2
     };
 
-    numerics::IFourierTransformer::ComplexVec GOut = mPreprocessor->execute(mTransformer, mExtendedParams);
+    numerics::IFourierTransformer::ComplexVec GOut = mPreprocessor->execute(mTransformer.get(), mExtendedParams);
 
     // For now we try a European call
     double K = 100.0;
@@ -83,9 +83,11 @@ void PCFTExecutor::execute(OutputPage& outputPage)
     }
 
     std::vector<std::vector<double> >& valueFunction = outputPage.valueFunction;
+    std::vector<double>& stateVector = outputPage.state;
     valueFunction.resize(1);
     for(int i = 0; i < N; i++)
     {
         valueFunction[0].push_back(vTempGrid[i + N/2].real());
+        stateVector.push_back(SGrid[i]);
     }
 }
